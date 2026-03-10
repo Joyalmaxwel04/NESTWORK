@@ -12,14 +12,22 @@ Stop explaining the same thing twice. NestWork gives your team one place to publ
 
 Features
 
--⚡ Snippets — Publish reusable code, templates, SOPs and notes with syntax highlighting and language tagging
+⚡ Snippets — Publish reusable code, templates, SOPs and notes with syntax highlighting and language tagging
+
 🗂 Knowledge Rooms — Upload team documents and query them instantly with an AI that reads your actual content
+
 ✏️ Improvement Proposals — Any member can propose changes to a snippet; the creator reviews and approves or rejects
+
 💬 Group Chat — Real-time team messaging with automatic 8-hour message expiry to keep things clean
+
 👥 Role-Based Access — Admin, Editor, and Viewer roles with full permission control
+
 📬 Join Request Flow — New members request access; admins approve and assign their role before they can log in
+
 🧠 Room AI — Click any document and get an instant AI summary powered by Claude
+
 🔍 Global Search — Search across snippets, rooms, and documents in one query
+
 🌙 Dark UI — Fully responsive dark interface that works on all screen sizes
 
 
