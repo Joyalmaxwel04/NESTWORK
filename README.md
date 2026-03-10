@@ -14,7 +14,7 @@ Stop explaining the same thing twice. NestWork gives your team one place to publ
 
 ⚡ Snippets — Publish reusable code, templates, SOPs and notes with syntax highlighting and language tagging
 
-🗂 Knowledge Rooms — Upload team documents and query them instantly with an AI that reads your actual content
+🗂 Knowledge Rooms — Upload team documents and query them instantly shows documents that reads your actual content
 
 ✏️ Improvement Proposals — Any member can propose changes to a snippet; the creator reviews and approves or rejects
 
