@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NestWork</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808;--bg2:#101010;--bg3:#161616;--bg4:#1e1e1e;
+  --border:#242424;--border2:#2e2e2e;
+  --text:#efefef;--text2:#808080;--text3:#3a3a3a;
+  --blue:#4f8ef7;--green:#34d399;--orange:#fb923c;
+  --red:#f87171;--purple:#a78bfa;--yellow:#fbbf24;
+  --sw:220px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+button,input,textarea,select{font-family:inherit;}
+a{cursor:pointer;}
+
+/* ── PAGES ── */
+.page{display:none;height:100vh;overflow:hidden;}
+.page.active{display:flex;}
+
+/* ── AUTH ── */
+#pg-login,#pg-register{align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden;}
+.auth-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 20% 30%,rgba(79,142,247,.07) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 80% 70%,rgba(167,139,250,.05) 0%,transparent 60%);}
+.auth-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.22;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 100%);}
+.auth-card{position:relative;z-index:1;width:100%;max-width:400px;padding:0 24px;animation:fadeUp .35s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:30px;}
+.auth-logo-mark{width:34px;height:34px;background:var(--text);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.auth-logo-name{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;letter-spacing:-.4px;}
+.auth-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.7px;margin-bottom:5px;}
+.auth-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5;}
+.auth-err{padding:9px 12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);border-radius:7px;font-size:12px;color:var(--red);display:none;margin-bottom:12px;}
+.auth-err.show{display:block;}
+.auth-form{display:flex;flex-direction:column;gap:11px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fl{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.6px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+.fi{padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s;}
+.fi:focus{border-color:var(--border2);}
+.fi::placeholder{color:var(--text3);}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.auth-btn{margin-top:4px;padding:11px;background:var(--text);border:none;border-radius:8px;color:var(--bg);font-size:14px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:opacity .15s;}
+.auth-btn:hover{opacity:.86;}
+.auth-btn:disabled{opacity:.4;cursor:not-allowed;}
+.auth-switch{text-align:center;margin-top:18px;font-size:13px;color:var(--text2);}
+.auth-switch a{color:var(--text);font-weight:600;}
+.auth-switch a:hover{text-decoration:underline;}
+.auth-note{text-align:center;margin-top:10px;font-size:11px;color:var(--text3);line-height:1.6;}
+
+/* ── APP ── */
+#pg-app{flex-direction:row;}
+
+/* ── OVERLAY ── */
+.s-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px);}
+.s-overlay.show{display:block;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sw);flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  height:100vh;
+  transition:transform .25s ease;z-index:100;
+  /* Fix: footer always visible */
+  overflow:hidden;
+}
+.s-logo{display:flex;align-items:center;gap:9px;padding:14px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.s-logo-mark{width:26px;height:26px;background:var(--text);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.s-logo-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:-.3px;}
+/* Nav scrolls, footer is fixed at bottom */
+.s-nav{flex:1;overflow-y:auto;padding:6px 8px;min-height:0;}
+.s-sec{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:10px 6px 4px;font-family:'JetBrains Mono',monospace;}
+.s-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;transition:all .12s;color:var(--text2);font-size:12px;font-weight:500;margin-bottom:1px;user-select:none;}
+.s-item:hover{background:var(--bg3);color:var(--text);}
+.s-item.active{background:var(--bg4);color:var(--text);}
+.s-icon{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
+.s-badge{margin-left:auto;font-size:9px;font-family:'JetBrains Mono',monospace;background:var(--bg4);padding:1px 5px;border-radius:3px;color:var(--text3);}
+.s-badge.red{background:rgba(248,113,113,.12);color:var(--red);}
+.s-room-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:5px;cursor:pointer;transition:all .12s;color:var(--text2);font-size:12px;margin-bottom:1px;user-select:none;}
+.s-room-item:hover{background:var(--bg3);color:var(--text);}
+.s-room-item.active{background:var(--bg4);color:var(--text);}
+.s-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.s-add{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;cursor:pointer;color:var(--text3);font-size:11px;transition:all .12s;margin-top:2px;}
+.s-add:hover{color:var(--text2);background:var(--bg3);}
+/* Footer always at bottom, never hidden */
+.s-footer{flex-shrink:0;padding:8px;border-top:1px solid var(--border);background:var(--bg2);}
+.s-user{display:flex;align-items:center;gap:8px;padding:6px 8px 0;}
+.s-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.s-uname{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.s-urole{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.s-logout-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:7px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;transition:all .15s;}
+.s-logout-btn:hover{background:rgba(248,113,113,.08);color:var(--red);border-color:rgba(248,113,113,.3);}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;height:50px;padding:0 14px;border-bottom:1px solid var(--border);background:var(--bg2);gap:10px;flex-shrink:0;}
+.tb-ham{display:none;flex-shrink:0;background:none;border:none;cursor:pointer;padding:6px;border-radius:5px;color:var(--text2);transition:color .12s;}
+.tb-ham:hover{color:var(--text);}
+.tb-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.2px;white-space:nowrap;flex-shrink:0;}
+.tb-sw{flex:1;max-width:300px;position:relative;}
+.tb-si{width:100%;padding:7px 10px 7px 27px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;outline:none;transition:border-color .12s;}
+.tb-si:focus{border-color:var(--border2);}
+.tb-si::placeholder{color:var(--text3);}
+.tb-si-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);}
+.tb-acts{display:flex;gap:6px;margin-left:auto;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .12s;border:1px solid var(--border);background:transparent;color:var(--text2);white-space:nowrap;font-family:'Syne',sans-serif;}
+.btn:hover{border-color:var(--border2);color:var(--text);background:var(--bg3);}
+.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text);}
+.btn.primary:hover{opacity:.87;}
+.btn.danger{border-color:rgba(248,113,113,.25);color:var(--red);background:rgba(248,113,113,.06);}
+.btn.danger:hover{background:rgba(248,113,113,.12);}
+.btn.sm{padding:4px 9px;font-size:11px;}
+.btn.xs{padding:2px 7px;font-size:10px;}
+
+/* ── VIEWS ── */
+.view{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.view.active{display:flex;}
+.vc{flex:1;overflow-y:auto;padding:16px;}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.g1{display:flex;flex-direction:column;gap:8px;}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:14px;transition:all .12s;cursor:pointer;}
+.card:hover{border-color:var(--border2);background:var(--bg3);}
+.card.static{cursor:default;}.card.static:hover{border-color:var(--border);background:var(--bg2);}
+.c-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.c-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.c-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;line-height:1.3;}
+.c-desc{font-size:12px;color:var(--text2);line-height:1.45;}
+.c-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.c-meta{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+
+/* ── BADGES ── */
+.badge{font-size:9px;font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:3px;font-weight:600;letter-spacing:.3px;white-space:nowrap;}
+.b-approved{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+.b-pending{background:rgba(251,191,36,.1);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+.b-draft{background:rgba(128,128,128,.1);color:var(--text2);border:1px solid var(--border);}
+.b-admin{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.15);}
+.b-editor{background:rgba(79,142,247,.1);color:var(--blue);border:1px solid rgba(79,142,247,.15);}
+.b-viewer{background:rgba(128,128,128,.1);color:var(--text2);border:1px solid var(--border);}
+
+/* ── MINI AVATAR ── */
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+
+/* ── SECTION LABEL ── */
+.slabel{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:8px;}
+
+/* ── DETAIL ── */
+.detail-wrap{display:grid;grid-template-columns:1fr 270px;flex:1;overflow:hidden;}
+.d-main{overflow-y:auto;padding:20px;border-right:1px solid var(--border);}
+.d-side{overflow-y:auto;padding:14px;background:var(--bg2);}
+.d-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;line-height:1.2;}
+.d-meta{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+
+/* ── CODE BLOCK — resizable + size presets ── */
+.code-block{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px;}
+.code-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.code-lang{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--text3);letter-spacing:.5px;}
+.code-acts{display:flex;gap:5px;align-items:center;}
+.code-copy{font-size:10px;color:var(--text3);cursor:pointer;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;transition:all .12s;}
+.code-copy:hover{color:var(--text);border-color:var(--border2);}
+.code-size-btn{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--text3);cursor:pointer;padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:transparent;transition:all .12s;}
+.code-size-btn:hover,.code-size-btn.active{color:var(--blue);border-color:rgba(79,142,247,.35);background:rgba(79,142,247,.06);}
+.code-body-wrap{position:relative;}
+.code-body{
+  padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:#cdd6f4;line-height:1.7;overflow-x:auto;overflow-y:auto;
+  white-space:pre;display:block;width:100%;background:transparent;
+  border:none;outline:none;resize:vertical;
+  min-height:120px;height:180px;
+  transition:height .15s ease;
+}
+
+/* ── PROPOSAL ITEMS ── */
+.prop-item{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px;margin-bottom:7px;}
+.prop-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.prop-auth{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;}
+.prop-time{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.prop-note{font-size:11px;color:var(--text2);margin-bottom:6px;line-height:1.4;font-style:italic;}
+.prop-preview{font-size:10px;font-family:'JetBrains Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:6px 8px;max-height:80px;overflow-y:auto;white-space:pre-wrap;color:var(--text2);margin-bottom:7px;}
+.prop-acts{display:flex;gap:5px;}
+.act-btn{padding:4px 10px;border-radius:4px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:all .12s;border:1px solid;}
+.btn-ok{background:rgba(52,211,153,.08);color:var(--green);border-color:rgba(52,211,153,.2);}
+.btn-ok:hover{background:rgba(52,211,153,.15);}
+.btn-no{background:rgba(248,113,113,.08);color:var(--red);border-color:rgba(248,113,113,.2);}
+.btn-no:hover{background:rgba(248,113,113,.15);}
+
+/* ── DIVIDER ── */
+.div{height:1px;background:var(--border);margin:12px 0;}
+
+/* ── ROOM DOCS ── */
+.doc-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;margin-bottom:7px;cursor:pointer;transition:all .12s;}
+.doc-item:hover{border-color:var(--border2);background:var(--bg4);}
+.doc-item.active-doc{border-color:var(--blue);background:rgba(79,142,247,.06);}
+.doc-icon{font-size:18px;flex-shrink:0;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.doc-meta{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.doc-acts{display:flex;gap:4px;flex-shrink:0;}
+
+/* ── ROOM LAYOUT ── */
+.room-body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;overflow:hidden;min-height:0;}
+.room-docs-col{overflow-y:auto;padding-right:2px;display:flex;flex-direction:column;}
+.room-ai-col{background:var(--bg2);border:1px solid var(--border);border-radius:9px;display:flex;flex-direction:column;overflow:hidden;}
+.ai-header{padding:10px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.ai-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
+/* No input bar in room AI */
+
+/* ── GROUP CHAT ── */
+.gchat-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.gchat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;}
+.gchat-inp-row{display:flex;gap:7px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+.gchat-inp{flex:1;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none;transition:border-color .12s;resize:none;min-height:38px;max-height:100px;}
+.gchat-inp:focus{border-color:var(--border2);}
+.gchat-inp::placeholder{color:var(--text3);}
+.gchat-send{padding:8px 14px;background:var(--text);border:none;border-radius:7px;color:var(--bg);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .12s;align-self:flex-end;}
+.gchat-send:hover{opacity:.87;}
+.chat-msg{display:flex;gap:9px;animation:msgIn .16s ease both;}
+.chat-msg.mine{flex-direction:row-reverse;}
+@keyframes msgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.chat-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px;}
+.chat-bubble-wrap{max-width:72%;}
+.chat-name{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:3px;}
+.chat-msg.mine .chat-name{text-align:right;}
+.chat-bub{padding:9px 12px;border-radius:9px;font-size:13px;line-height:1.5;word-break:break-word;}
+.chat-msg:not(.mine) .chat-bub{background:var(--bg3);border:1px solid var(--border);border-top-left-radius:3px;}
+.chat-msg.mine .chat-bub{background:var(--text);color:var(--bg);border-top-right-radius:3px;}
+.chat-time{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.chat-msg.mine .chat-time{text-align:right;}
+.chat-exp{font-size:9px;color:var(--red);opacity:.6;}
+
+/* AI typing */
+.typing{display:flex;gap:3px;align-items:center;padding:2px 0;}
+.typing span{width:4px;height:4px;border-radius:50%;background:var(--text3);animation:tb 1.2s ease-in-out infinite;}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.ai-bub{padding:10px 13px;border-radius:9px;font-size:12px;line-height:1.6;background:var(--bg3);border:1px solid var(--border);}
+.ai-bub.loading{display:flex;}
+
+/* ── MEMBERS ── */
+.mem-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:7px;}
+.mem-info{flex:1;min-width:0;}
+.mem-name{font-size:13px;font-weight:600;}
+.mem-sub{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.role-sel{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 7px;color:var(--text);font-size:10px;font-family:'JetBrains Mono',monospace;outline:none;cursor:pointer;}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:300;backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:11px;width:100%;max-width:460px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:mIn .18s ease both;max-height:90vh;overflow-y:auto;}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.m-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:3px;}
+.m-sub{font-size:12px;color:var(--text2);margin-bottom:18px;}
+.mfg{margin-bottom:11px;}
+.mfl{display:block;font-size:9px;font-weight:700;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;font-family:'JetBrains Mono',monospace;}
+.mfi,.mfs,.mfta{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;transition:border-color .12s;}
+.mfi:focus,.mfs:focus,.mfta:focus{border-color:var(--border2);}
+.mfi::placeholder,.mfta::placeholder{color:var(--text3);}
+.mfs{cursor:pointer;}.mfs option{background:var(--bg3);}
+.mfta{resize:vertical;min-height:90px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;}
+.m-acts{display:flex;gap:7px;justify-content:flex-end;margin-top:16px;}
+.btn-cancel{padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;transition:all .12s;}
+.btn-cancel:hover{border-color:var(--border2);color:var(--text);}
+.btn-confirm{padding:7px 16px;border-radius:6px;border:none;background:var(--text);color:var(--bg);font-size:12px;font-weight:800;font-family:'Syne',sans-serif;cursor:pointer;transition:opacity .12s;}
+.btn-confirm:hover{opacity:.87;}
+.ep{display:flex;flex-wrap:wrap;gap:6px;}
+.ep-i{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:all .12s;}
+.ep-i:hover,.ep-i.sel{border-color:var(--border2);background:var(--bg4);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:10px 14px;font-size:12px;z-index:9999;transform:translateY(50px);opacity:0;transition:all .22s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:280px;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:36px 20px;color:var(--text3);}
+.empty-icon{font-size:26px;margin-bottom:8px;}
+.empty-text{font-size:12px;line-height:1.5;}
+
+/* ── LOADING ── */
+#loading{position:fixed;inset:0;background:rgba(8,8,8,.92);z-index:9998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;font-size:12px;color:var(--text2);}
+#loading.show{display:flex;}
+.spin{animation:spin 1s linear infinite;font-size:24px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESPONSIVE ── */
+/* ── RESPONSIVE — all devices ── */
+@media(max-width:1024px){
+  .detail-wrap{grid-template-columns:1fr 220px;}
+  .room-body{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:768px){
+  :root{--sw:260px;}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;transform:translateX(-100%);box-shadow:8px 0 32px rgba(0,0,0,.4);}
+  .sidebar.open{transform:translateX(0);}
+  .tb-ham{display:flex;}
+  .tb-sw{max-width:none;flex:1;}
+  .tb-acts .btn:not(.primary){display:none;}
+  .g2{grid-template-columns:1fr;}
+  .detail-wrap{grid-template-columns:1fr;}
+  .d-side{display:none;}
+  .room-body{grid-template-columns:1fr;overflow-y:auto;}
+  .room-ai-col{min-height:320px;max-height:420px;}
+  .f-row{grid-template-columns:1fr;}
+  .chat-bubble-wrap{max-width:85%;}
+  .mem-row{flex-wrap:wrap;gap:8px;}
+}
+@media(max-width:540px){
+  .topbar{padding:0 10px;gap:7px;}
+  .tb-title{font-size:13px;}
+  .vc{padding:10px;}
+  .modal{padding:14px;border-radius:10px;}
+  .auth-card{padding:0 16px;}
+  .auth-title{font-size:22px;}
+  .card{padding:12px;}
+  .c-foot{flex-wrap:wrap;gap:6px;}
+  .d-main{padding:14px;}
+}
+@media(max-width:400px){
+  :root{--sw:100vw;}
+  .auth-title{font-size:20px;}
+  .topbar{height:46px;}
+  .btn{padding:5px 10px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="page active" id="pg-login">
+  <div class="auth-bg"></div><div class="auth-grid"></div>
+  <div class="auth-card">
+    <div class="auth-logo"><div class="auth-logo-mark">🪺</div><div class="auth-logo-name">NestWork</div></div>
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-sub">Sign in to your workspace.</div>
+    <div class="auth-err" id="li-err"></div>
+    <div class="auth-form">
+      <div class="fg"><label class="fl">Email</label><input class="fi" id="li-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
+      <div class="fg"><label class="fl">Password</label><input class="fi" id="li-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="auth-btn" id="li-btn" onclick="doLogin()">Sign In</button>
+    </div>
+    <div class="auth-switch">No account? <a onclick="showPage('register')">Request access</a></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="page" id="pg-register">
+  <div class="auth-bg"></div><div class="auth-grid"></div>
+  <div class="auth-card">
+    <div class="auth-logo"><div class="auth-logo-mark">🪺</div><div class="auth-logo-name">NestWork</div></div>
+    <div class="auth-title">Request access</div>
+    <div class="auth-sub">An admin will review and approve your request.</div>
+    <div class="auth-err" id="rg-err"></div>
+    <div class="auth-form">
+      <div class="f-row">
+        <div class="fg"><label class="fl">First name</label><input class="fi" id="rg-first" placeholder="Alex"></div>
+        <div class="fg"><label class="fl">Last name</label><input class="fi" id="rg-last" placeholder="Johnson"></div>
+      </div>
+      <div class="fg"><label class="fl">Email</label><input class="fi" id="rg-email" type="email" placeholder="you@company.com"></div>
+      <div class="fg"><label class="fl">Password</label><input class="fi" id="rg-pass" type="password" placeholder="Min. 6 characters"></div>
+      <div class="fg"><label class="fl">Confirm password</label><input class="fi" id="rg-pass2" type="password" placeholder="Repeat password" onkeydown="if(event.key==='Enter')doRegister()"></div>
+      <button class="auth-btn" id="rg-btn" onclick="doRegister()">Send Request</button>
+    </div>
+    <div class="auth-note">Your request will be reviewed by a workspace admin.<br>You can log in once approved.</div>
+    <div class="auth-switch" style="margin-top:10px;">Already approved? <a onclick="showPage('login')">Sign in</a></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="page" id="pg-app">
+  <div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="s-logo">
+      <div class="s-logo-mark">🪺</div>
+      <div class="s-logo-name">NestWork</div>
+    </div>
+    <div class="s-nav">
+      <div class="s-sec">Workspace</div>
+      <div class="s-item active" id="nav-snippets" onclick="goView('snippets');closeSidebar()">
+        <span class="s-icon">⚡</span>Snippets<span class="s-badge" id="cnt-snip">0</span>
+      </div>
+      <div class="s-item" id="nav-pending" onclick="goView('pending');closeSidebar()">
+        <span class="s-icon">⏳</span>Pending<span class="s-badge red" id="cnt-pend">0</span>
+      </div>
+      <div class="s-item" id="nav-chat" onclick="goView('chat');closeSidebar()">
+        <span class="s-icon">💬</span>Group Chat
+      </div>
+      <div class="s-item" id="nav-members" onclick="goView('members');closeSidebar()">
+        <span class="s-icon">👥</span>Members
+      </div>
+      <div class="s-item" id="nav-requests" onclick="goView('requests');closeSidebar()" style="display:none">
+        <span class="s-icon">📬</span>Join Requests<span class="s-badge red" id="cnt-req">0</span>
+      </div>
+      <div class="s-sec" style="margin-top:6px;">Knowledge Rooms</div>
+      <div id="sidebarRooms"></div>
+      <div class="s-add" onclick="openModal('m-room');closeSidebar()">+ New Room</div>
+    </div>
+    <div class="s-footer">
+      <div class="s-user">
+        <div class="s-av" id="sAv">?</div>
+        <div style="flex:1;min-width:0;">
+          <div class="s-uname" id="sName">—</div>
+          <div class="s-urole" id="sRole">—</div>
+        </div>
+      </div>
+      <button class="s-logout-btn" onclick="doLogout()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16,17 21,12 16,7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="tb-ham" onclick="toggleSidebar()">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+          <rect width="18" height="2" rx="1" fill="currentColor"/>
+          <rect y="6" width="18" height="2" rx="1" fill="currentColor"/>
+          <rect y="12" width="18" height="2" rx="1" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="tb-title" id="tbTitle">Snippets</div>
+      <div class="tb-sw">
+        <span class="tb-si-icon">🔍</span>
+        <input class="tb-si" id="gSearch" placeholder="Search…" oninput="handleSearch(this.value)">
+      </div>
+      <div class="tb-acts">
+        <button class="btn" onclick="openModal('m-snippet')">+ Snippet</button>
+        <button class="btn primary" onclick="openModal('m-room')">+ Room</button>
+      </div>
+    </div>
+
+    <!-- SNIPPETS -->
+    <div class="view active" id="view-snippets">
+      <div class="vc"><div class="g2" id="snipGrid"></div></div>
+    </div>
+
+    <!-- PENDING -->
+    <div class="view" id="view-pending">
+      <div class="vc"><div class="g1" id="pendList"></div></div>
+    </div>
+
+    <!-- GROUP CHAT -->
+    <div class="view" id="view-chat">
+      <!-- header -->
+      <div style="flex-shrink:0;padding:12px 16px 10px;border-bottom:1px solid var(--border);background:var(--bg2);">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;">Group Chat</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">Messages auto-delete after 8 hours · Shift+Enter for new line</div>
+      </div>
+      <!-- input bar — directly under header, always visible, never depends on remaining space -->
+      <div style="flex-shrink:0;display:flex;align-items:flex-end;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2);">
+        <textarea id="gchatInp" placeholder="Write a message and press Enter to send…" rows="1"
+          style="flex:1;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none;resize:none;min-height:40px;max-height:120px;font-family:inherit;line-height:1.5;transition:border-color .15s;"
+          onkeydown="gchatKey(event)" oninput="autoResize(this)"></textarea>
+        <button onclick="sendChatMsg()"
+          style="flex-shrink:0;height:40px;padding:0 18px;background:var(--text);border:none;border-radius:7px;color:var(--bg);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .15s;white-space:nowrap;">
+          Send
+        </button>
+      </div>
+      <!-- messages scroll freely below -->
+      <div id="gchatMsgs" style="flex:1;min-height:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="view" id="view-members">
+      <div class="vc">
+        <div style="max-width:580px;">
+          <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:3px;">Members</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Manage roles and access</div>
+          <div id="memList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOIN REQUESTS -->
+    <div class="view" id="view-requests">
+      <div class="vc">
+        <div style="max-width:580px;">
+          <div class="slabel" style="margin-bottom:12px;">Pending Join Requests</div>
+          <div id="reqList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="view" id="view-search">
+      <div class="vc" id="searchOut"></div>
+    </div>
+
+    <!-- SNIPPET DETAIL -->
+    <div class="view" id="view-snip-detail">
+      <div class="detail-wrap">
+        <div class="d-main" id="dMain"></div>
+        <div class="d-side" id="dSide"></div>
+      </div>
+    </div>
+
+    <!-- ROOM -->
+    <div class="view" id="view-room">
+      <div class="vc" style="display:flex;flex-direction:column;gap:10px;overflow:hidden;height:100%;padding-bottom:0;">
+        <div id="roomHead" style="flex-shrink:0;"></div>
+        <div class="room-body" id="roomBody">
+          <div class="room-docs-col">
+            <div class="slabel" style="margin-bottom:8px;flex-shrink:0;">Documents</div>
+            <div id="roomDocs" style="flex:1;"></div>
+            <div id="roomDocUploadBtn" style="margin-top:8px;flex-shrink:0;"></div>
+          </div>
+          <div class="room-ai-col">
+            <div class="ai-header">
+              <span style="font-size:13px;">🧠</span>
+              <span style="font-size:12px;font-weight:700;font-family:'Syne',sans-serif;">Room Knowledge AI</span>
+              <span class="badge b-editor" style="margin-left:auto;">AI</span>
+            </div>
+            <div class="ai-msgs" id="aiMsgs">
+              <div class="empty">
+                <div class="empty-icon">🧠</div>
+                <div class="empty-text">Click any document<br>to get an AI summary</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODALS -->
+
+<!-- NEW SNIPPET -->
+<div class="modal-overlay" id="m-snippet">
+  <div class="modal">
+    <div class="m-title">New Snippet</div>
+    <div class="m-sub">Share reusable code, templates, SOPs or notes.</div>
+    <div class="mfg"><label class="mfl">Title</label><input class="mfi" id="ms-title" placeholder="e.g. Auth middleware"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="mfg"><label class="mfl">Type</label>
+        <select class="mfs" id="ms-type">
+          <option value="code">💻 Code</option><option value="template">📝 Template</option>
+          <option value="sop">📋 SOP</option><option value="note">💡 Note</option>
+        </select>
+      </div>
+      <div class="mfg"><label class="mfl">Language</label>
+        <select class="mfs" id="ms-lang">
+          <option value="javascript">JavaScript</option><option value="python">Python</option>
+          <option value="typescript">TypeScript</option><option value="sql">SQL</option>
+          <option value="bash">Bash</option><option value="text">Plain text</option>
+        </select>
+      </div>
+    </div>
+    <div class="mfg"><label class="mfl">Description</label><input class="mfi" id="ms-desc" placeholder="Brief description"></div>
+    <div class="mfg"><label class="mfl">Content</label><textarea class="mfta" id="ms-content" style="min-height:120px;" placeholder="Paste your content here…"></textarea></div>
+    <div class="m-acts">
+      <button class="btn-cancel" onclick="closeModal('m-snippet')">Cancel</button>
+      <button class="btn-confirm" onclick="createSnippet()">Post Snippet</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT SNIPPET -->
+<div class="modal-overlay" id="m-edit-snippet">
+  <div class="modal">
+    <div class="m-title">Edit Snippet</div>
+    <div class="m-sub">Update your snippet — only you can edit this.</div>
+    <div class="mfg"><label class="mfl">Title</label><input class="mfi" id="es-title"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="mfg"><label class="mfl">Type</label>
+        <select class="mfs" id="es-type">
+          <option value="code">💻 Code</option><option value="template">📝 Template</option>
+          <option value="sop">📋 SOP</option><option value="note">💡 Note</option>
+        </select>
+      </div>
+      <div class="mfg"><label class="mfl">Language</label>
+        <select class="mfs" id="es-lang">
+          <option value="javascript">JavaScript</option><option value="python">Python</option>
+          <option value="typescript">TypeScript</option><option value="sql">SQL</option>
+          <option value="bash">Bash</option><option value="text">Plain text</option>
+        </select>
+      </div>
+    </div>
+    <div class="mfg"><label class="mfl">Description</label><input class="mfi" id="es-desc"></div>
+    <div class="mfg"><label class="mfl">Content</label><textarea class="mfta" id="es-content" style="min-height:140px;"></textarea></div>
+    <div class="m-acts">
+      <button class="btn-cancel" onclick="closeModal('m-edit-snippet')">Cancel</button>
+      <button class="btn-confirm" onclick="saveEditSnippet()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW ROOM -->
+<div class="modal-overlay" id="m-room">
+  <div class="modal">
+    <div class="m-title">New Knowledge Room</div>
+    <div class="m-sub">A space to store and query team documents with AI.</div>
+    <div class="mfg"><label class="mfl">Room Name</label><input class="mfi" id="mr-name" placeholder="e.g. Backend API, HR Handbook"></div>
+    <div class="mfg"><label class="mfl">Description</label><input class="mfi" id="mr-desc" placeholder="What knowledge lives here?"></div>
+    <div class="mfg"><label class="mfl">Icon</label><div class="ep" id="emojiPicker"></div></div>
+    <div class="m-acts">
+      <button class="btn-cancel" onclick="closeModal('m-room')">Cancel</button>
+      <button class="btn-confirm" onclick="createRoom()">Create Room</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD DOC -->
+<div class="modal-overlay" id="m-doc">
+  <div class="modal">
+    <div class="m-title" id="md-modal-title">Upload Document</div>
+    <div class="m-sub">Paste document content. All members can view, only you and admin can edit.</div>
+    <div class="mfg"><label class="mfl">Document Name</label><input class="mfi" id="md-name" placeholder="e.g. API Standards, Onboarding Guide"></div>
+    <div class="mfg"><label class="mfl">File Type</label>
+      <select class="mfs" id="md-type">
+        <option value="text">📄 Text / Guide</option>
+        <option value="policy">📋 Policy</option>
+        <option value="technical">🔧 Technical Doc</option>
+        <option value="other">📎 Other</option>
+      </select>
+    </div>
+    <div class="mfg"><label class="mfl">Content</label><textarea class="mfta" id="md-content" style="min-height:160px;" placeholder="Paste the document content here…"></textarea></div>
+    <div class="m-acts">
+      <button class="btn-cancel" onclick="closeModal('m-doc')">Cancel</button>
+      <button class="btn-confirm" id="md-confirm-btn" onclick="saveDoc()">Upload</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROPOSE -->
+<div class="modal-overlay" id="m-propose">
+  <div class="modal">
+    <div class="m-title">Propose Improvement</div>
+    <div class="m-sub">Submit your improved version. The snippet creator will review the full diff.</div>
+    <div class="mfg"><label class="mfl">Your Improved Version</label><textarea class="mfta" id="mp-content" style="min-height:140px;"></textarea></div>
+    <div class="mfg"><label class="mfl">Note to creator</label><input class="mfi" id="mp-note" placeholder="What did you change and why?"></div>
+    <div class="m-acts">
+      <button class="btn-cancel" onclick="closeModal('m-propose')">Cancel</button>
+      <button class="btn-confirm" onclick="submitProposal()">Submit Proposal</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="tIcon"></span><span id="tMsg"></span></div>
+<div id="loading"><div class="spin">🪺</div><div>Loading workspace…</div></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+const API = '/api';
+let token       = localStorage.getItem('nw_token');
+let currentUser = JSON.parse(localStorage.getItem('nw_user')||'null');
+let members=[], rooms=[], snippets=[];
+let activeRoom=null, activeSnippet=null;
+let selEmoji='🗂️', proposeId=null;
+let editingDocId=null, editingDocRoomId=null;
+let chatPollTimer=null;
+
+// ═══════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════
+async function api(method, path, body) {
+  const h = {'Content-Type':'application/json'};
+  if (token) h['Authorization'] = 'Bearer '+token;
+  try {
+    const r = await fetch(API+path, {method, headers:h, body:body?JSON.stringify(body):null});
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error||'Request failed');
+    return d.data;
+  } catch(e) {
+    if (!e.message?.includes('fetch')) showToast('❌', e.message||'Error');
+    throw e;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+async function doLogin() {
+  const email=$('li-email').value.trim(), pass=$('li-pass').value;
+  const err=$('li-err'); err.classList.remove('show');
+  if (!email||!pass){showErr(err,'Please fill in all fields');return;}
+  const btn=$('li-btn'); btn.disabled=true; btn.textContent='Signing in…';
+  try {
+    const d = await api('POST','/auth/login',{email,password:pass});
+    token=d.token; currentUser=d.user;
+    localStorage.setItem('nw_token',token);
+    localStorage.setItem('nw_user',JSON.stringify(currentUser));
+    await bootApp();
+  } catch(e){showErr(err,e.message||'Invalid credentials');}
+  btn.disabled=false; btn.textContent='Sign In';
+}
+
+async function doRegister() {
+  const first=$('rg-first').value.trim(), last=$('rg-last').value.trim();
+  const email=$('rg-email').value.trim();
+  const pass=$('rg-pass').value, pass2=$('rg-pass2').value;
+  const err=$('rg-err'); err.classList.remove('show');
+  if (!first||!last||!email||!pass){showErr(err,'All fields required');return;}
+  if (pass!==pass2){showErr(err,'Passwords do not match');return;}
+  if (pass.length<6){showErr(err,'Password must be at least 6 characters');return;}
+  const btn=$('rg-btn'); btn.disabled=true; btn.textContent='Sending…';
+  try {
+    await api('POST','/auth/request-join',{name:first+' '+last,email,password:pass});
+    showToast('📬','Request sent! An admin will review it.');
+    showPage('login');
+    ['rg-first','rg-last','rg-email','rg-pass','rg-pass2'].forEach(id=>$(id).value='');
+  } catch(e){showErr(err,e.message);}
+  btn.disabled=false; btn.textContent='Send Request';
+}
+
+function doLogout() {
+  token=null; currentUser=null;
+  localStorage.removeItem('nw_token');
+  localStorage.removeItem('nw_user');
+  clearInterval(chatPollTimer);
+  showPage('login');
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+async function bootApp() {
+  setLoading(true);
+  try {
+    [members,rooms,snippets] = await Promise.all([
+      api('GET','/members'),
+      api('GET','/rooms'),
+      api('GET','/snippets'),
+    ]);
+    rooms    = rooms.map(normRoom);
+    snippets = snippets.map(normSnip);
+  } catch {setLoading(false);return;}
+  setLoading(false);
+  updateUserUI(); renderSidebar(); renderSnippets(); renderPending(); renderMembers(); updateCounts(); initEmojiPicker();
+  if (currentUser?.role==='admin'){
+    $('nav-requests').style.display='flex';
+    loadJoinRequests();
+  }
+  showPage('app');
+  // Start chat polling every 10s
+  chatPollTimer = setInterval(()=>{ if(currentView()==='chat') loadChat(); }, 10000);
+}
+
+function normRoom(r)  { return {...r, desc:r.description||''}; }
+function normSnip(s)  {
+  return {...s, desc:s.description||'',
+    createdAt:(s.created_at||'').slice(0,10),
+    proposals:(s.proposals||[]).map(p=>({...p,time:ago(p.created_at)}))};
+}
+function ago(d) {
+  if(!d) return '';
+  const m=Math.floor((Date.now()-new Date(d))/60000);
+  if(m<1) return 'just now'; if(m<60) return m+'m ago';
+  const h=Math.floor(m/60); if(h<24) return h+'h ago';
+  return Math.floor(h/24)+'d ago';
+}
+function timeLeft(exp) {
+  const ms = new Date(exp) - Date.now();
+  if (ms<=0) return 'expired';
+  const h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);
+  if (h>0) return `${h}h ${m}m left`;
+  return `${m}m left`;
+}
+
+function updateUserUI() {
+  if (!currentUser) return;
+  $('sAv').textContent=currentUser.initials||'?';
+  $('sAv').style.cssText=`background:${currentUser.color||'#4f8ef7'};color:white;`;
+  $('sName').textContent=currentUser.name;
+  $('sRole').textContent=(currentUser.role||'').toUpperCase();
+}
+
+function updateCounts() {
+  $('cnt-snip').textContent=snippets.length;
+  const p=snippets.reduce((a,s)=>a+(s.proposals||[]).filter(p=>p.status==='pending').length,0);
+  $('cnt-pend').textContent=p;
+}
+
+function currentView() {
+  const v = document.querySelector('.view.active');
+  return v ? v.id.replace('view-','') : '';
+}
+
+// ═══════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════
+function renderSidebar() {
+  $('sidebarRooms').innerHTML = rooms.map(r=>`
+    <div class="s-room-item ${activeRoom?.id===r.id?'active':''}" onclick="openRoom('${r.id}');closeSidebar()">
+      <div class="s-dot" style="background:${r.color}"></div>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(r.name)}</span>
+      <span style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;">${r.doc_count||0}</span>
+    </div>`).join('');
+}
+function toggleSidebar(){$('sidebar').classList.toggle('open');$('sOverlay').classList.toggle('show');}
+function closeSidebar() {$('sidebar').classList.remove('open');$('sOverlay').classList.remove('show');}
+
+// ═══════════════════════════════════════════════
+// SNIPPETS
+// ═══════════════════════════════════════════════
+const TI={code:'💻',template:'📝',sop:'📋',note:'💡'};
+const TC={code:'rgba(167,139,250,.1)',template:'rgba(79,142,247,.1)',sop:'rgba(52,211,153,.1)',note:'rgba(251,191,36,.1)'};
+
+function renderSnippets(filter) {
+  const grid=$('snipGrid');
+  const list=filter?snippets.filter(s=>[s.title,s.desc,s.content].some(f=>(f||'').toLowerCase().includes(filter.toLowerCase()))):snippets;
+  if(!list.length){grid.innerHTML=emptyH('⚡','No snippets yet.');return;}
+  grid.innerHTML=list.map(s=>{
+    const au=members.find(m=>m.id===s.author_id)||{};
+    const pc=(s.proposals||[]).filter(p=>p.status==='pending').length;
+    return `<div class="card" onclick="openSnippet('${s.id}')">
+      <div class="c-head">
+        <div class="c-icon" style="background:${TC[s.type]||TC.code}">${TI[s.type]||'📄'}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="c-title">${esc(s.title)}</div>
+          <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;">
+            <span class="badge b-${s.status}">${s.status}</span>
+            ${pc>0?`<span class="badge b-pending">⏳ ${pc}</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="c-desc">${esc(s.desc)}</div>
+      <div class="c-foot">
+        <div class="c-meta">${avH(au,15)} ${fn(au.name)} · ${s.createdAt}</div>
+        <span class="badge" style="background:var(--bg4);color:var(--text3);border:1px solid var(--border);">${s.lang}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// PENDING
+// ═══════════════════════════════════════════════
+function renderPending() {
+  const el=$('pendList');
+  const pend=snippets.flatMap(s=>(s.proposals||[]).filter(p=>p.status==='pending').map(p=>({...p,snippet:s})));
+  if(!pend.length){el.innerHTML=emptyH('✅','All caught up!');return;}
+  el.innerHTML=pend.map(p=>{
+    const au=members.find(m=>m.id===p.author_id)||{};
+    const own=p.snippet.author_id===currentUser?.id;
+    return `<div class="card static">
+      <div style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:5px;">IMPROVEMENT FOR</div>
+      <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:8px;color:var(--blue);cursor:pointer;" onclick="openSnippet('${p.snippet.id}')">${esc(p.snippet.title)}</div>
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;">
+        ${avH(au,20)} <span style="font-size:12px;font-weight:600;">${esc(au.name||'?')}</span>
+        <span style="font-size:9px;color:var(--text3);">${p.time}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);background:var(--bg3);padding:8px 10px;border-radius:6px;border:1px solid var(--border);font-style:italic;margin-bottom:8px;">"${esc(p.note)}"</div>
+      ${own?`
+        <details style="margin-bottom:8px;">
+          <summary style="font-size:10px;color:var(--text3);cursor:pointer;user-select:none;">View proposed content</summary>
+          <pre style="font-size:10px;font-family:'JetBrains Mono',monospace;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:8px;margin-top:6px;overflow-x:auto;white-space:pre-wrap;color:var(--text2);">${esc(p.content)}</pre>
+        </details>
+        <div style="display:flex;gap:6px;">
+          <button class="act-btn btn-ok" onclick="approveProposal('${p.snippet.id}','${p.id}')">✓ Approve — replace content</button>
+          <button class="act-btn btn-no" onclick="rejectProposal('${p.snippet.id}','${p.id}')">✗ Reject</button>
+        </div>`
+      :`<div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;">Awaiting review by snippet creator</div>`}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// JOIN REQUESTS
+// ═══════════════════════════════════════════════
+async function loadJoinRequests() {
+  try {
+    const reqs=await api('GET','/join-requests');
+    $('cnt-req').textContent=reqs.length;
+    $('reqList').innerHTML=!reqs.length?emptyH('📬','No pending requests.'):reqs.map(r=>`
+      <div class="card static" style="margin-bottom:8px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:3px;">${esc(r.name)}</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:5px;">${esc(r.email)}</div>
+            <div style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;">${ago(r.created_at)}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;min-width:140px;">
+            <div>
+              <div style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--text3);margin-bottom:4px;letter-spacing:.5px;">ASSIGN ROLE</div>
+              <select id="role-${r.id}" class="role-sel" style="width:100%;padding:5px 8px;font-size:11px;">
+                <option value="viewer">Viewer</option>
+                <option value="editor" selected>Editor</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="act-btn btn-ok" onclick="approveReq('${r.id}')">✓ Approve</button>
+              <button class="act-btn btn-no" onclick="rejectReq('${r.id}')">✗ Reject</button>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch {}
+}
+async function approveReq(rid) {
+  try {
+    const roleEl = document.getElementById('role-'+rid);
+    const role   = roleEl ? roleEl.value : 'editor';
+    const d=await api('POST',`/join-requests/${rid}/approve`,{role});
+    showToast('✅',`${d.name} approved as ${d.role}`);
+    members=await api('GET','/members'); renderMembers(); loadJoinRequests();
+  } catch {}
+}
+async function rejectReq(rid) {
+  try {
+    await api('POST',`/join-requests/${rid}/reject`);
+    showToast('✗','Request rejected'); loadJoinRequests();
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// MEMBERS
+// ═══════════════════════════════════════════════
+function renderMembers() {
+  $('memList').innerHTML=members.map(m=>`
+    <div class="mem-row">
+      <div class="av" style="width:32px;height:32px;background:${m.color||'#888'};color:white;font-size:12px;">${m.initials||'?'}</div>
+      <div class="mem-info">
+        <div class="mem-name">${esc(m.name)}${m.id===currentUser?.id?' <span style="font-size:9px;color:var(--text3);">(you)</span>':''}</div>
+        <div class="mem-sub">${m.snippet_count||0} snippets</div>
+      </div>
+      <span class="badge b-${m.role}">${m.role.toUpperCase()}</span>
+      ${m.id!==currentUser?.id&&currentUser?.role==='admin'?`
+        <select class="role-sel" onchange="changeRole('${m.id}',this.value)">
+          <option value="editor" ${m.role==='editor'?'selected':''}>EDITOR</option>
+          <option value="viewer" ${m.role==='viewer'?'selected':''}>VIEWER</option>
+          <option value="admin"  ${m.role==='admin' ?'selected':''}>ADMIN</option>
+        </select>
+        <button class="btn xs danger" onclick="deleteMember('${m.id}','${esc(m.name)}')">Remove</button>`:''}
+    </div>`).join('');
+}
+async function changeRole(mid,role) {
+  try {await api('PATCH',`/members/${mid}`,{role});members=await api('GET','/members');renderMembers();showToast('👥',`Role updated to ${role}`);}catch{}
+}
+async function deleteMember(mid,name) {
+  if(!confirm(`Remove ${name}?`)) return;
+  try {
+    await api('DELETE',`/members/${mid}`);
+    members=members.filter(m=>m.id!==mid);
+    renderMembers(); showToast('🗑️',`${name} removed`);
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// SNIPPET DETAIL
+// ═══════════════════════════════════════════════
+async function openSnippet(id) {
+  try { activeSnippet=normSnip(await api('GET',`/snippets/${id}`)); } catch { return; }
+  const s=activeSnippet, au=s.author||{}, own=s.author_id===currentUser?.id;
+
+  $('dMain').innerHTML=`
+    <div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <button class="btn sm" onclick="goBack()">← Back</button>
+      ${own?`<button class="btn sm" onclick="openEditSnippet('${s.id}')">✏️ Edit</button>`:''}
+      ${own||currentUser?.role==='admin'?`<button class="btn sm danger" onclick="deleteSnippet('${s.id}')">Delete</button>`:''}
+    </div>
+    <div class="d-title">${esc(s.title)}</div>
+    <div class="d-meta">
+      <span class="badge b-${s.status}">${s.status}</span>
+      <span class="badge" style="background:${TC[s.type]};color:var(--text2);border:1px solid var(--border);">${TI[s.type]} ${s.type}</span>
+      <div style="display:flex;align-items:center;gap:5px;margin-left:auto;font-size:11px;color:var(--text2);">
+        ${avH(au,16)} ${esc(au.name||'?')} · ${s.createdAt}
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.5;">${esc(s.desc)}</div>
+    <div class="code-block">
+      <div class="code-head">
+        <span class="code-lang">${(s.lang||'').toUpperCase()}</span>
+        <div class="code-acts">
+          <button class="code-size-btn active" onclick="setCodeSize(this,180)">1×</button>
+          <button class="code-size-btn" onclick="setCodeSize(this,300)">3×</button>
+          <button class="code-size-btn" onclick="setCodeSize(this,420)">4×</button>
+          <button class="code-size-btn" onclick="setCodeSize(this,560)">5×</button>
+          <button class="code-copy" onclick="copySnip()">Copy</button>
+        </div>
+      </div>
+      <textarea class="code-body" id="codeDisplay" readonly spellcheck="false">${esc(s.content)}</textarea>
+    </div>
+    ${!own?`<button class="btn primary" onclick="openProposeModal('${s.id}')">✏️ Propose Improvement</button>`
+          :`<div style="font-size:11px;color:var(--text3);padding:4px 0;">You created this snippet — review proposals in the sidebar →</div>`}`;
+
+  const pp=(s.proposals||[]).filter(p=>p.status==='pending');
+  const ap=(s.proposals||[]).filter(p=>p.status==='approved');
+  $('dSide').innerHTML=`
+    <div class="slabel">Proposals (${pp.length})</div>
+    ${pp.length?pp.map(p=>{
+      const pa=members.find(m=>m.id===p.author_id)||{};
+      return `<div class="prop-item">
+        <div class="prop-head">
+          <div class="prop-auth">${avH(pa,20)} ${fn(pa.name)}</div>
+          <span class="prop-time">${p.time}</span>
+        </div>
+        <div class="prop-note">"${esc(p.note)}"</div>
+        <div class="prop-preview">${esc(p.content)}</div>
+        <div class="prop-acts">
+          ${own
+            ?`<button class="act-btn btn-ok" onclick="approveProposal('${s.id}','${p.id}')">✓ Approve</button>
+              <button class="act-btn btn-no" onclick="rejectProposal('${s.id}','${p.id}')">✗ Reject</button>`
+            :`<span style="font-size:9px;color:var(--text3);">Awaiting creator</span>`}
+        </div>
+      </div>`;
+    }).join(''):`<div style="font-size:11px;color:var(--text3);padding:6px 0;">No pending proposals</div>`}
+    <div class="div"></div>
+    <div class="slabel">History</div>
+    ${ap.length?ap.map(p=>{
+      const pa=members.find(m=>m.id===p.author_id)||{};
+      return `<div style="display:flex;align-items:center;gap:5px;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);">
+        ${avH(pa,14)} ✅ Edit by ${fn(pa.name)} approved</div>`;
+    }).join(''):`<div style="font-size:11px;color:var(--text3);">None yet</div>`}
+    <div class="div"></div>
+    <div class="slabel">Details</div>
+    <div style="font-size:10px;color:var(--text2);line-height:2.2;font-family:'JetBrains Mono',monospace;">
+      <div>Created: ${s.createdAt}</div><div>Type: ${s.type}</div>
+      <div>Language: ${s.lang}</div><div>Status: ${s.status}</div>
+    </div>`;
+
+  setNav(''); showView('snip-detail'); $('tbTitle').textContent=s.title;
+}
+
+function openEditSnippet(id) {
+  const s=activeSnippet||snippets.find(x=>x.id===id);
+  if(!s) return;
+  $('es-title').value=s.title;
+  $('es-desc').value=s.desc;
+  $('es-content').value=s.content;
+  $('es-type').value=s.type;
+  $('es-lang').value=s.lang;
+  openModal('m-edit-snippet');
+}
+
+async function saveEditSnippet() {
+  if(!activeSnippet) return;
+  const title=$('es-title').value.trim(), content=$('es-content').value.trim();
+  if(!title||!content){showToast('⚠️','Title and content required');return;}
+  try {
+    await api('PATCH',`/snippets/${activeSnippet.id}`,{
+      title, content,
+      description:$('es-desc').value.trim()||title,
+      type:$('es-type').value, lang:$('es-lang').value
+    });
+    closeModal('m-edit-snippet');
+    snippets=(await api('GET','/snippets')).map(normSnip);
+    updateCounts(); renderSnippets();
+    openSnippet(activeSnippet.id);
+    showToast('✅','Snippet updated');
+  } catch {}
+}
+
+async function deleteSnippet(id) {
+  if(!confirm('Delete this snippet?')) return;
+  try {
+    await api('DELETE',`/snippets/${id}`);
+    snippets=snippets.filter(s=>s.id!==id);
+    updateCounts(); renderSnippets(); renderPending(); goBack();
+    showToast('🗑️','Snippet deleted');
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// ROOM
+// ═══════════════════════════════════════════════
+async function openRoom(id) {
+  try {
+    const r=await api('GET',`/rooms/${id}`);
+    activeRoom={...normRoom(r),docs:r.docs||[]};
+  } catch { return; }
+
+  $('tbTitle').textContent=activeRoom.emoji+' '+activeRoom.name;
+  const isCreator = activeRoom.created_by===currentUser?.id;
+  const canManage = isCreator||currentUser?.role==='admin';
+
+  $('roomHead').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-size:26px;">${activeRoom.emoji}</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;">${esc(activeRoom.name)}</div>
+          <div style="font-size:12px;color:var(--text2);">${esc(activeRoom.desc)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        ${currentUser?.role==='admin'?`<button class="btn sm danger" onclick="deleteRoom('${activeRoom.id}')">Delete Room</button>`:''}
+        <button class="btn sm" onclick="goBack()">← Back</button>
+      </div>
+    </div>`;
+
+  // Upload button only for room creator or admin
+  $('roomDocUploadBtn').innerHTML = canManage
+    ? `<button class="btn" style="width:100%;justify-content:center;" onclick="openUploadDoc()">+ Upload Document</button>`
+    : `<div style="font-size:10px;color:var(--text3);text-align:center;padding:6px;font-family:'JetBrains Mono',monospace;">View only — only the room creator can upload</div>`;
+
+  renderRoomDocs(canManage);
+  $('aiMsgs').innerHTML=`<div class="empty"><div class="empty-icon">🧠</div><div class="empty-text">Click any document<br>to get an AI summary</div></div>`;
+  renderSidebar(); setNav(''); showView('room');
+}
+
+function renderRoomDocs(canManage) {
+  const docs=activeRoom?.docs||[];
+  const typeIcon={text:'📄',policy:'📋',technical:'🔧',other:'📎'};
+  if(!docs.length){
+    $('roomDocs').innerHTML=`<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No documents yet.</div></div>`;
+    return;
+  }
+  const isRoomCreator=activeRoom.created_by===currentUser?.id;
+  const isAdmin=currentUser?.role==='admin';
+  $('roomDocs').innerHTML=docs.map(d=>{
+    const canEdit=d.uploaded_by===currentUser?.id||isAdmin||isRoomCreator;
+    return `<div class="doc-item" id="di-${d.id}" onclick="summarizeDoc('${d.id}')">
+      <div class="doc-icon">${typeIcon[d.file_type]||'📄'}</div>
+      <div class="doc-info">
+        <div class="doc-name">${esc(d.name)}</div>
+        <div class="doc-meta">${d.file_type} · ${ago(d.created_at)}</div>
+      </div>
+      <div class="doc-acts" onclick="event.stopPropagation()">
+        ${canEdit?`<button class="btn xs" onclick="openEditDoc('${d.id}')">Edit</button>`:''}
+        ${canEdit?`<button class="btn xs danger" onclick="deleteDoc('${activeRoom.id}','${d.id}','${esc(d.name)}')">×</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openUploadDoc() {
+  editingDocId=null; editingDocRoomId=activeRoom?.id;
+  $('md-modal-title').textContent='Upload Document';
+  $('md-confirm-btn').textContent='Upload';
+  $('md-name').value=''; $('md-content').value=''; $('md-type').value='text';
+  openModal('m-doc');
+}
+
+function openEditDoc(did) {
+  const doc=activeRoom?.docs?.find(d=>d.id===did);
+  if(!doc) return;
+  editingDocId=did; editingDocRoomId=activeRoom?.id;
+  $('md-modal-title').textContent='Edit Document';
+  $('md-confirm-btn').textContent='Save Changes';
+  $('md-name').value=doc.name;
+  $('md-content').value=doc.content;
+  $('md-type').value=doc.file_type||'text';
+  openModal('m-doc');
+}
+
+async function saveDoc() {
+  const name=$('md-name').value.trim(), content=$('md-content').value.trim(), type=$('md-type').value;
+  if(!name){showToast('⚠️','Name required');return;}
+  if(!content){showToast('⚠️','Content required');return;}
+  try {
+    if(editingDocId) {
+      // Edit existing
+      const updated=await api('PATCH',`/rooms/${editingDocRoomId}/docs/${editingDocId}`,{name,content,file_type:type});
+      const idx=activeRoom.docs.findIndex(d=>d.id===editingDocId);
+      if(idx>=0) activeRoom.docs[idx]=updated;
+      showToast('✅','Document updated');
+    } else {
+      // Upload new
+      const doc=await api('POST',`/rooms/${editingDocRoomId}/docs`,{name,content,file_type:type});
+      activeRoom.docs.unshift(doc);
+      const r=rooms.find(x=>x.id===editingDocRoomId);
+      if(r) r.doc_count=(r.doc_count||0)+1;
+      renderSidebar();
+      showToast('📄',`"${name}" uploaded`);
+    }
+    closeModal('m-doc');
+    const isCreator=activeRoom.created_by===currentUser?.id;
+    const canManage=isCreator||currentUser?.role==='admin';
+    renderRoomDocs(canManage);
+  } catch {}
+}
+
+async function deleteDoc(rid,did,name) {
+  if(!confirm(`Delete "${name}"?`)) return;
+  try {
+    await api('DELETE',`/rooms/${rid}/docs/${did}`);
+    activeRoom.docs=activeRoom.docs.filter(d=>d.id!==did);
+    const isCreator=activeRoom.created_by===currentUser?.id;
+    renderRoomDocs(isCreator||currentUser?.role==='admin');
+    showToast('🗑️','Document deleted');
+  } catch {}
+}
+
+async function deleteRoom(id) {
+  if(!confirm('Delete this room and all documents?')) return;
+  try {
+    await api('DELETE',`/rooms/${id}`);
+    rooms=rooms.filter(r=>r.id!==id);
+    activeRoom=null; renderSidebar(); goBack();
+    showToast('🗑️','Room deleted');
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// ROOM AI — click doc → summarize
+// ═══════════════════════════════════════════════
+async function summarizeDoc(did) {
+  if(!activeRoom) return;
+  // Highlight selected doc
+  document.querySelectorAll('.doc-item').forEach(d=>d.classList.remove('active-doc'));
+  document.getElementById('di-'+did)?.classList.add('active-doc');
+
+  const aiMsgs=$('aiMsgs');
+  // Show loading
+  aiMsgs.innerHTML=`<div class="ai-bub loading"><div class="typing"><span></span><span></span><span></span></div></div>`;
+
+  try {
+    const doc=await api('POST',`/rooms/${activeRoom.id}/docs/${did}/summarize`);
+    // Call Claude to summarize
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:600,
+        system:`You are NestWork AI. Summarize the following document clearly and concisely. Use bullet points where helpful. Be practical.`,
+        messages:[{role:'user',content:`Document: "${doc.name}"\n\n${doc.content}\n\nPlease provide a clear summary.`}]
+      })
+    });
+    const d=await res.json();
+    const ans=d.content?.map(i=>i.text||'').join('')||'Could not summarize.';
+    aiMsgs.innerHTML=`
+      <div style="margin-bottom:8px;">
+        <div class="slabel">📄 ${esc(doc.name)}</div>
+      </div>
+      <div class="ai-bub">${ans.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^•/gm,'•')}</div>`;
+  } catch {
+    // Fallback: show doc content directly
+    const doc=activeRoom.docs.find(d=>d.id===did);
+    if(doc) {
+      aiMsgs.innerHTML=`
+        <div style="margin-bottom:8px;"><div class="slabel">📄 ${esc(doc.name)}</div></div>
+        <div class="ai-bub" style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:11px;">${esc(doc.content)}</div>`;
+    } else {
+      aiMsgs.innerHTML=`<div class="empty"><div class="empty-icon">❌</div><div class="empty-text">Could not load document.</div></div>`;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// GROUP CHAT
+// ═══════════════════════════════════════════════
+async function loadChat() {
+  try {
+    const msgs=await api('GET','/chat/messages');
+    renderChatMsgs(msgs);
+  } catch {}
+}
+
+function renderChatMsgs(msgs) {
+  const el=$('gchatMsgs');
+  const wasAtBottom=el.scrollHeight-el.scrollTop-el.clientHeight<60;
+  if(!msgs||!msgs.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">No messages yet.<br>Say hello to the team!</div></div>`;
+    return;
+  }
+  el.innerHTML=msgs.map(m=>{
+    const mine=m.author_id===currentUser?.id;
+    const left=timeLeft(m.expires_at);
+    return `<div class="chat-msg ${mine?'mine':''}">
+      ${!mine?`<div class="chat-av" style="background:${m.color||'#888'};color:white;">${m.initials||'?'}</div>`:''}
+      <div class="chat-bubble-wrap">
+        <div class="chat-name">${mine?'You':esc(m.name)} <span class="chat-exp">${left}</span></div>
+        <div class="chat-bub">${esc(m.message).replace(/\n/g,'<br>')}</div>
+        <div class="chat-time">${ago(m.created_at)}</div>
+      </div>
+      ${mine?`<div class="chat-av" style="background:${currentUser?.color||'#4f8ef7'};color:white;">${currentUser?.initials||'?'}</div>`:''}
+    </div>`;
+  }).join('');
+  if(wasAtBottom||true) el.scrollTop=el.scrollHeight;
+}
+
+async function sendChatMsg() {
+  const inp=$('gchatInp');
+  const msg=inp.value.trim();
+  if(!msg) return;
+  inp.value=''; inp.style.height='';
+  try {
+    await api('POST','/chat/messages',{message:msg});
+    await loadChat();
+  } catch {}
+}
+
+function gchatKey(e) {
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMsg();}
+}
+
+function autoResize(el) {
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+}
+
+// ═══════════════════════════════════════════════
+// PROPOSALS
+// ═══════════════════════════════════════════════
+function openProposeModal(sid) {
+  proposeId=sid;
+  const s=snippets.find(x=>x.id===sid)||activeSnippet;
+  $('mp-content').value=s?.content||'';
+  openModal('m-propose');
+}
+
+async function submitProposal() {
+  const content=$('mp-content').value.trim(), note=$('mp-note').value.trim();
+  if(!content||!proposeId) return;
+  try {
+    await api('POST',`/snippets/${proposeId}/proposals`,{content,note:note||'Proposed improvement'});
+    closeModal('m-propose'); $('mp-note').value='';
+    snippets=(await api('GET','/snippets')).map(normSnip);
+    updateCounts(); renderPending(); openSnippet(proposeId);
+    showToast('📝','Proposal submitted');
+  } catch {}
+}
+
+async function approveProposal(sid,pid) {
+  try {
+    await api('POST',`/proposals/${pid}/approve`);
+    snippets=(await api('GET','/snippets')).map(normSnip);
+    updateCounts(); renderPending();
+    if(activeSnippet?.id===sid) openSnippet(sid);
+    showToast('✅','Approved — snippet content replaced');
+  } catch {}
+}
+
+async function rejectProposal(sid,pid) {
+  try {
+    await api('POST',`/proposals/${pid}/reject`);
+    snippets=(await api('GET','/snippets')).map(normSnip);
+    updateCounts(); renderPending();
+    if(activeSnippet?.id===sid) openSnippet(sid);
+    showToast('✗','Proposal rejected');
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// CREATE
+// ═══════════════════════════════════════════════
+async function createSnippet() {
+  const title=$('ms-title').value.trim(), content=$('ms-content').value.trim();
+  if(!title||!content){showToast('⚠️','Title and content required');return;}
+  try {
+    await api('POST','/snippets',{title,content,description:$('ms-desc').value.trim()||title,type:$('ms-type').value,lang:$('ms-lang').value});
+    closeModal('m-snippet');
+    ['ms-title','ms-content','ms-desc'].forEach(id=>$(id).value='');
+    snippets=(await api('GET','/snippets')).map(normSnip);
+    updateCounts(); renderSnippets(); showToast('⚡','Snippet created');
+  } catch {}
+}
+
+async function createRoom() {
+  const name=$('mr-name').value.trim();
+  if(!name){showToast('⚠️','Room name required');return;}
+  try {
+    const r=await api('POST','/rooms',{name,description:$('mr-desc').value.trim()||'Knowledge room',emoji:selEmoji});
+    rooms.unshift(normRoom({...r,doc_count:0}));
+    closeModal('m-room'); $('mr-name').value=''; $('mr-desc').value='';
+    renderSidebar(); showToast('🗂️',`"${name}" created`);
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════════
+async function handleSearch(q) {
+  if(!q.trim()){goView('snippets');return;}
+  goView('search');
+  try {
+    const r=await api('GET',`/search?q=${encodeURIComponent(q)}`);
+    $('searchOut').innerHTML=`
+      <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">
+        <strong style="color:var(--text)">${r.snippets.length}</strong> snippets ·
+        <strong style="color:var(--text)">${r.rooms.length}</strong> rooms ·
+        <strong style="color:var(--text)">${r.docs.length}</strong> docs
+        — "<strong style="color:var(--text)">${esc(q)}</strong>"
+      </div>
+      ${r.snippets.length?`<div class="slabel" style="margin-bottom:8px;">Snippets</div><div class="g2" style="margin-bottom:14px;">
+        ${r.snippets.map(s=>`<div class="card" onclick="openSnippet('${s.id}')">
+          <div class="c-head"><div class="c-icon" style="background:${TC[s.type]||TC.code}">${TI[s.type]||'📄'}</div>
+          <div style="flex:1;"><div class="c-title">${esc(s.title)}</div><span class="badge b-${s.status}">${s.status}</span></div></div>
+          <div class="c-desc">${esc(s.description||'')}</div></div>`).join('')}
+      </div>`:''}
+      ${r.rooms.length?`<div class="slabel" style="margin-bottom:8px;">Rooms</div><div class="g2" style="margin-bottom:14px;">
+        ${r.rooms.map(rm=>`<div class="card" onclick="openRoom('${rm.id}')">
+          <div class="c-head"><div style="font-size:22px;">${rm.emoji}</div>
+          <div><div class="c-title">${esc(rm.name)}</div></div></div>
+          <div class="c-desc">${esc(rm.description||'')}</div></div>`).join('')}
+      </div>`:''}
+      ${r.docs.length?`<div class="slabel" style="margin-bottom:8px;">Documents</div><div class="g1">
+        ${r.docs.map(d=>`<div class="doc-item" onclick="openRoom('${d.room_id}')">
+          <div class="doc-icon">📄</div>
+          <div class="doc-info"><div class="doc-name">${esc(d.name)}</div>
+          <div class="doc-meta">${esc(d.room_name)} ${d.emoji||''}</div></div></div>`).join('')}
+      </div>`:''}
+      ${!r.snippets.length&&!r.rooms.length&&!r.docs.length?emptyH('🔍',`No results for "${esc(q)}"`):''}`;
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function initEmojiPicker() {
+  const emojis=['🗂️','🚀','🔧','🎨','📋','💡','📊','🌍','🔬','💼','🎯','🛡️','⚙️','🧩','📱'];
+  $('emojiPicker').innerHTML=emojis.map(e=>
+    `<div class="ep-i ${e===selEmoji?'sel':''}" onclick="pickEmoji('${e}',this)">${e}</div>`
+  ).join('');
+}
+function pickEmoji(e,el){selEmoji=e;document.querySelectorAll('.ep-i').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');}
+
+function copySnip(){if(activeSnippet){navigator.clipboard?.writeText(activeSnippet.content);showToast('📋','Copied!');}}
+
+function setCodeSize(btn, h) {
+  const cb = $('codeDisplay');
+  if (cb) { cb.style.height = h + 'px'; cb.style.transition = 'height .2s ease'; }
+  document.querySelectorAll('.code-size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function goBack(){activeSnippet=null;activeRoom=null;goView('snippets');}
+
+function goView(name){
+  showView(name);setNav(name);
+  const t={snippets:'Snippets',pending:'Pending Proposals',chat:'Group Chat',members:'Members',requests:'Join Requests',search:'Search'};
+  $('tbTitle').textContent=t[name]||name;
+  if(name==='members')  renderMembers();
+  if(name==='pending')  renderPending();
+  if(name==='requests') loadJoinRequests();
+  if(name==='chat')     loadChat();
+}
+
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name)?.classList.add('active');
+}
+function setNav(name){
+  document.querySelectorAll('.s-item').forEach(n=>n.classList.remove('active'));
+  if(name) document.getElementById('nav-'+name)?.classList.add('active');
+}
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+name)?.classList.add('active');
+}
+function openModal(id) {document.getElementById(id)?.classList.add('open');}
+function closeModal(id){document.getElementById(id)?.classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+function setLoading(on){$('loading').classList.toggle('show',on);}
+
+let tT;
+function showToast(icon,msg){
+  const t=$('toast');$('tIcon').textContent=icon;$('tMsg').textContent=msg;
+  t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function showErr(el,msg){el.textContent=msg;el.classList.add('show');}
+function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function $(id){return document.getElementById(id);}
+function fn(n){return(n||'?').split(' ')[0];}
+function avH(u,s){return `<div class="av" style="width:${s}px;height:${s}px;background:${u.color||'#555'};color:white;font-size:${Math.round(s*.45)}px;">${u.initials||'?'}</div>`;}
+function emptyH(icon,text){return `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">${icon}</div><div class="empty-text">${text}</div></div>`;}
+
+// ═══════════════════════════════════════════════
+// STARTUP
+// ═══════════════════════════════════════════════
+(async()=>{
+  if(token&&currentUser){
+    try{await bootApp();}catch{doLogout();}
+  }
+})();
+</script>
+</body>
+</html>
