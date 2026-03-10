@@ -1,7 +1,7 @@
 # Perfect Tool for Team Collaboration work
 
 NestWork — Team Knowledge Platform
-A self-hosted workspace where developers and teams store, share, and query knowledge together. Snippets, AI-powered rooms, proposals, and group chat — all in one dark-mode web app.
+A self-hosted workspace where developers and teams store, share, and query knowledge together. Snippets, instruction rooms, proposals, and group chat — all in one dark-mode web app.
 
 ![image alt](https://github.com/Joyalmaxwel04/NESTWORK/blob/d77103cc9b77a72729beaebd94fb0cd8841d6977/1773141372704.jpg)
 
