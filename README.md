@@ -1,4 +1,4 @@
-Website for Collaboration work
+# Website for Collaboration work
 
 NestWork — Team Knowledge Platform
 A self-hosted workspace where developers and teams store, share, and query knowledge together. Snippets, AI-powered rooms, proposals, and group chat — all in one dark-mode web app.
@@ -10,7 +10,7 @@ Stop explaining the same thing twice. NestWork gives your team one place to publ
 ![image alt](https://github.com/Joyalmaxwel04/NESTWORK/blob/3e3ef077a147679bb43f1c3c23e361deb7d87d96/thumbnail/1773142362535.jpg)
 
 
-Features
+# Features
 
 ⚡ Snippets — Publish reusable code, templates, SOPs and notes with syntax highlighting and language tagging
 
@@ -31,7 +31,8 @@ Features
 🌙 Dark UI — Fully responsive dark interface that works on all screen sizes
 
 
-Tech Stack
+# Tech Stack
+
 Backend — Python / Flask / SQLite / JWT Auth
 Frontend — Vanilla HTML, CSS, JavaScript (no framework)
 AI — Anthropic Claude API
@@ -47,7 +48,7 @@ python app.py
 http://localhost:5000
 
 
-Demo Accounts
+# Demo Accounts
 
 Email : alex@nestwork.io
 Password : password123
