@@ -52,15 +52,15 @@ http://localhost:5000
 
 # Demo Accounts
 
-Email : alex@nestwork.io
-Password : password123
-Role : Admin
+### Email : alex@nestwork.io
+### Password : password123
+### Role : Admin
 
 
-Email : sara@nestwork.io
-Password : password123
-Role : Editor
+### Email : sara@nestwork.io
+### Password : password123
+### Role : Editor
 
-Email : james@nestwork.io
-Password : password123
-Role : Editor
+### Email : james@nestwork.io
+### Password : password123
+### Role : Editor
