@@ -12,7 +12,7 @@ Stop explaining the same thing twice. NestWork gives your team one place to publ
 
 Features
 
-⚡ Snippets — Publish reusable code, templates, SOPs and notes with syntax highlighting and language tagging
+-⚡ Snippets — Publish reusable code, templates, SOPs and notes with syntax highlighting and language tagging
 🗂 Knowledge Rooms — Upload team documents and query them instantly with an AI that reads your actual content
 ✏️ Improvement Proposals — Any member can propose changes to a snippet; the creator reviews and approves or rejects
 💬 Group Chat — Real-time team messaging with automatic 8-hour message expiry to keep things clean
