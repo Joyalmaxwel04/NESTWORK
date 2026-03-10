@@ -1,4 +1,4 @@
-### Website for Collaboration work
+# Website for Collaboration work
 
 NestWork — Team Knowledge Platform
 A self-hosted workspace where developers and teams store, share, and query knowledge together. Snippets, AI-powered rooms, proposals, and group chat — all in one dark-mode web app.
@@ -24,7 +24,7 @@ Stop explaining the same thing twice. NestWork gives your team one place to publ
 
 📬 Join Request Flow — New members request access; admins approve and assign their role before they can log in
 
-🧠 Room AI — Click any document and get an instant AI summary powered by Claude
+🧠 Room — Click any document and get an instant summary
 
 🔍 Global Search — Search across snippets, rooms, and documents in one query
 
@@ -34,17 +34,19 @@ Stop explaining the same thing twice. NestWork gives your team one place to publ
 # Tech Stack
 
 Backend — Python / Flask / SQLite / JWT Auth
+
 Frontend — Vanilla HTML, CSS, JavaScript (no framework)
-AI — Anthropic Claude API
+
 Auth — Flask-JWT-Extended
-Getting Started
-# 1. Install dependencies
+
+# Getting Started
+## 1. Install dependencies
 pip install flask flask-cors flask-jwt-extended
 
-# 2. Run the app
+## 2. Run the app
 python app.py
 
-# 3. Open in browser
+## 3. Open in browser
 http://localhost:5000
 
 
