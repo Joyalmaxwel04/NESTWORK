@@ -9,6 +9,8 @@ Stop explaining the same thing twice. NestWork gives your team one place to publ
 
 ![image alt](https://github.com/Joyalmaxwel04/NESTWORK/blob/3e3ef077a147679bb43f1c3c23e361deb7d87d96/thumbnail/1773142362535.jpg)
 
+---
+![image_alt](https://github.com/joyalmaxwell/NESTWORK/blob/808cb72c50244d663d4f7b05e3b8ccd6de1d1cbd/thumbnail/file_000000006aec720baebee6740202604b.png)
 
 # Features
 
